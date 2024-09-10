@@ -25,16 +25,47 @@ export const useStaleQuoteUpdater = (
 
   useIntervalTimer(staleTimeout, !isQuoteValid)
 
+  // useEffect(() => {
+  //   if (isQuoteValid && !isQuoteLoading && !isWalletPending) {
+  //     timeoutRef.current = setTimeout(() => {
+  //       eventListenerRef.current = null
+  //       setIsStale(true)
+
+  //       const newEventListener = () => {
+  //         refreshQuoteCallback()
+  //         eventListenerRef.current = null
+  //         setIsStale(false)
+  //       }
+
+  //       document.addEventListener('mousemove', newEventListener, {
+  //         once: true,
+  //       })
+
+  //       eventListenerRef.current = newEventListener
+  //     }, staleTimeout)
+  //   }
+
+  //   return () => {
+  //     if (timeoutRef.current) {
+  //       clearTimeout(timeoutRef.current)
+  //       setIsStale(false)
+  //     }
+  //   }
+  // }, [quote, isQuoteLoading, isWalletPending])
+
   useEffect(() => {
     if (isQuoteValid && !isQuoteLoading && !isWalletPending) {
+      console.log('Timeout set')
       timeoutRef.current = setTimeout(() => {
         eventListenerRef.current = null
         setIsStale(true)
 
         const newEventListener = () => {
-          refreshQuoteCallback()
-          eventListenerRef.current = null
-          setIsStale(false)
+          console.log('refreshQuoteCallback triggered')
+          refreshQuoteCallback().then(() => {
+            eventListenerRef.current = null
+            setIsStale(false)
+          })
         }
 
         document.addEventListener('mousemove', newEventListener, {
@@ -48,6 +79,7 @@ export const useStaleQuoteUpdater = (
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
+        console.log('Timeout cleared')
         setIsStale(false)
       }
     }

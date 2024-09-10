@@ -197,9 +197,27 @@ const StateManagedBridge = () => {
     }
   }
 
+  const refreshQuoteCallback = async () => {
+    console.log('refreshQuoteCallback started')
+
+    // Introduce the delay
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(null)
+      }, quoteTimeout + 5000)
+    })
+
+    // Now call getAndSetBridgeQuote after the delay
+    console.log('Calling getAndSetBridgeQuote')
+    await getAndSetBridgeQuote()
+
+    console.log('refreshQuoteCallback finished')
+  }
+
   const isQuoteStale = useStaleQuoteUpdater(
     bridgeQuote,
-    getAndSetBridgeQuote,
+    // getAndSetBridgeQuote,
+    refreshQuoteCallback,
     isLoading,
     isWalletPending,
     quoteTimeout
