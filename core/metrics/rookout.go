@@ -2,6 +2,9 @@
 
 package metrics
 
+// DefaultGitRepo is the default git repo for sanguine.
+// exposed here to allow it to be overridden by an ldflag rather than an env var.
+const DefaultGitRepo = "https://github.com/synapsecns/sanguine"
 import (
 	"os"
 
@@ -12,9 +15,6 @@ import (
 	"github.com/synapsecns/sanguine/core/metrics/internal"
 )
 
-// DefaultGitRepo is the default git repo for sanguine.
-// exposed here to allow it to be overridden by an ldflag rather than an env var.
-const DefaultGitRepo = "https://github.com/synapsecns/sanguine"
 
 // rookout is sideloaded.
 // TODO: consider moving this to metrics and doing after boot.
