@@ -19,7 +19,6 @@ import (
 )
 
 func (e *exporter) getBridgeConfig(ctx context.Context) (*bridgeconfig.BridgeConfigRef, error) {
-	// client, err := e.omnirpcClient.GetClient(ctx, big.NewInt(int64(e.cfg.BridgeConfig.ChainID)))
 	client, err := e.omnirpcClient.GetConfirmationsClient(ctx, e.cfg.BridgeConfig.ChainID, 1)
 	if err != nil {
 		return nil, fmt.Errorf("could not get confirmations client: %w", err)
