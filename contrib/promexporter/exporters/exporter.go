@@ -46,7 +46,7 @@ type exporter struct {
 	cfg           config.Config
 	omnirpcClient omnirpcClient.RPCClient
 
-	otelRecorder iOtelRecorder
+	otelRecorder OtelRecorder
 }
 
 // StartExporterServer starts the exporter server.

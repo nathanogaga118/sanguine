@@ -14,10 +14,10 @@ import (
 	"github.com/lmittmann/w3/module/eth"
 	"github.com/lmittmann/w3/w3types"
 	"github.com/synapsecns/sanguine/contrib/promexporter/internal/decoders"
+	"github.com/synapsecns/sanguine/core/metrics"
 	rfqAPIModel "github.com/synapsecns/sanguine/services/rfq/api/model"
 )
 
-// TODO: This is ugly. We can probably get this from the config.
 var usdcAddresses = map[int]string{
 	1:      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
 	10:     "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
@@ -30,7 +30,11 @@ var usdcAddresses = map[int]string{
 // TODO: this function does too many things.
 //
 //nolint:cyclop
-func (e *exporter) fetchRelayerBalances(ctx context.Context, url string) error {
+func (e *exporter) fetchRelayerBalances(ctx context.Context, url string) (err error) {
+	ctx, span := e.metrics.Tracer().Start(ctx, "fetch_relayer_balances")
+	defer func() {
+		metrics.EndSpanWithErr(span, err)
+	}()
 	// Fetch relayer addresses
 	quotes, err := e.fetchAllQuotes(ctx, url)
 	if err != nil {

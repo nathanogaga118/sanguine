@@ -22,7 +22,7 @@ func (e *exporter) stuckHeroCountStats(parentCtx context.Context, owner common.A
 		metrics.EndSpanWithErr(span, err)
 	}()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	dfkClient := dfk.NewClient(e.client, e.cfg.DFKUrl)
