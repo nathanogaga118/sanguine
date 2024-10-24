@@ -52,36 +52,41 @@ func (b *Bot) requiresSignoz(definition *slacker.CommandDefinition) *slacker.Com
 // TODO: add trace middleware.
 func (b *Bot) traceCommand() *slacker.CommandDefinition {
 	return b.requiresSignoz(&slacker.CommandDefinition{
-		Command:     "trace {tags} {order}",
-		Description: "find a transaction in signoz",
+		Command:     "trace {tags} {service} {order}",
+		Description: "TESTING TESTING in signoz",
 		Examples: []string{
-			"trace transaction_id:0x1234@serviceName:rfq",
-			"trace transaction_id:0x1234@serviceName:rfq a",
-			"trace transaction_id:0x1234@serviceName:rfq asc",
+			"trace transaction_id:0x1234 serviceName:rfq",
+			"trace transaction_id:0x1234 serviceName:rfq a",
+			"trace transaction_id:0x1234 serviceName:rfq asc",
 		},
 		Handler: func(ctx *slacker.CommandContext) {
 			tags := stripLinks(ctx.Request().Param("tags"))
-			splitTags := strings.Split(tags, "@")
-			if len(splitTags) == 0 {
-				_, err := ctx.Response().Reply("please provide tags in a key:value format")
-				if err != nil {
-					log.Println(err)
-				}
-				return
-			}
+			_, _ = ctx.Response().Reply("these are the tags: " + tags)
+			service := strings.ToLower(ctx.Request().Param("service"))
+			_, _ = ctx.Response().Reply("this is the service: " + service)
+			order := strings.ToLower(ctx.Request().Param("order"))
+			_, _ = ctx.Response().Reply("this is the order: " + order)
 
 			searchMap := make(map[string]string)
-			for _, combinedTag := range splitTags {
-				tag := strings.Split(combinedTag, ":")
-				if len(tag) != 2 {
-					_, err := ctx.Response().Reply("please provide tags in a key:value format")
-					if err != nil {
-						log.Println(err)
-					}
-					return
-				}
-				searchMap[tag[0]] = tag[1]
-			}
+			tagsSplit := strings.Split(tags, ":")
+			serviceSplit := strings.Split(service, ":")
+			searchMap[tagsSplit[0]] = tagsSplit[1]
+			searchMap[serviceSplit[0]] = serviceSplit[1]
+			// _, _ = ctx.Response().Reply("this is the search map: " + fmt.Sprintf("%v", searchMap))
+			// _, _ = ctx.Response().Reply("these are the split tags: " + strings.Join(splitTags, ", "))
+			// for _, combinedTag := range splitTags {
+			// 	tag := strings.Split(combinedTag, ":")
+			// 	if len(tag) != 2 {
+			// 		_, err := ctx.Response().Reply("please provide tags in a key:value format")
+			// 		if err != nil {
+			// 			log.Println(err)
+			// 		}
+			// 		return
+			// 	}
+			// 	searchMap[tag[0]] = tag[1]
+			// }
+
+			_, _ = ctx.Response().Reply("this is the search map: " + fmt.Sprintf("%v", searchMap))
 
 			// search for the transaction
 			res, err := b.signozClient.SearchTraces(ctx.Context(), signoz.Last3Hr, searchMap)
@@ -111,9 +116,9 @@ func (b *Bot) traceCommand() *slacker.CommandDefinition {
 				return
 			}
 
-			order := strings.ToLower(ctx.Request().Param("order"))
 			isAscending := order == "a" || order == "asc"
 			if isAscending {
+				_, _ = ctx.Response().Reply("sorting in ascending order")
 				sort.Slice(traceList, func(i, j int) bool {
 					return traceList[i].Timestamp.Before(traceList[j].Timestamp)
 				})
