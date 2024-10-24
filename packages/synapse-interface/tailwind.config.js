@@ -110,6 +110,26 @@ module.exports = {
         xxl: ['1.5rem', { lineHeight: '1.75rem' }],
       },
       colors: {
+        cortex: {
+          strong: 'hsl(var(--cortex-strong) / <alpha-value>)',
+          text: 'hsl(var(--cortex-text) / <alpha-value>)',
+          stroke: 'hsl(var(--cortex-stroke) / <alpha-value>)',
+          border: 'hsl(var(--cortex-border) / <alpha-value>)',
+          tint: 'hsl(var(--cortex-tint) / <alpha-value>)',
+          bg: 'hsl(var(--cortex-bg) / <alpha-value>)',
+          platform: 'hsl(var(--cortex-platform) / <alpha-value>)',
+          shade: 'hsl(var(--cortex-shade) / <alpha-value>)',
+          highlight: 'hsl(var(--cortex-highlight) / <alpha-value>)',
+
+          'bg-platform': 'hsl(225deg 67.5% 98%)',
+          'shade-light': 'hsl(225deg 90% 95%)',
+          'shade-dark': 'hsl(240deg 70% 18%)',
+
+          red: 'hsl(15deg 100% 55%)',
+          green: 'hsl(120deg 100% 45%)',
+          blue: 'hsl(210deg 100% 60%)',
+          yellow: 'hsl(50deg 100% 65%)',
+        },
         // updated colors
         strong: '#FCFCFD',
         primary: '#EEEDEF',

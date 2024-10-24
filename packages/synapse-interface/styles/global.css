@@ -6,6 +6,32 @@
   background: hsl(256deg 7.5% 9.25%);
 }
 
+@layer base {
+  :root {
+    --cortex-strong: 225deg 100% 18%;
+    --cortex-text: 225deg 75% 20%;
+    --cortex-stroke: 225deg 50% 80%;
+    --cortex-border: 225deg 75% 92.5%;
+    --cortex-highlight: 225deg 100% 40%;
+    --cortex-tint: 225deg 0% 100%;
+    --cortex-bg: 165deg 65% 98%;
+    --cortex-platform: 225deg 67.5% 98%;
+    --cortex-shade: 225deg 90% 97%;
+  }
+
+  .dark {
+    --cortex-strong: 240deg 25% 100%;
+    --cortex-text: 240deg 20% 90%;
+    --cortex-stroke: 240deg 15% 45%;
+    --cortex-border: 240deg 30% 20%;
+    --cortex-highlight: 50deg 100% 65%;
+    --cortex-tint: 240deg 50% 18%;
+    --cortex-bg: 240deg 55% 17%;
+    --cortex-platform: 240deg 60% 16%;
+    --cortex-shade: 240deg 65% 12.5%;
+  }
+}
+
 body {
   text-rendering: optimizeLegibility;
   overscroll-behavior-y: none;

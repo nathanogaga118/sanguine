@@ -78,41 +78,36 @@ const PoolsPage = () => {
   }, [currentAddress])
 
   return (
-    <LandingPageWrapper>
-      <StandardPageContainer
-        connectedChainId={connectedChainId}
-        address={address}
-      >
-        <div className="flex-wrap justify-between mb-4 md:flex">
-          <PageHeader
-            title={t('Incentivized Pools')}
-            subtitle={t('Contributors are rewarded')}
-          />
-        </div>
-        <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
-          <PoolCards address={address} pools={blastPools} />
-          <PoolCards address={address} pools={incentivizedPools} />
-        </Grid>
-        <div className="flex-wrap justify-between mt-8 mb-4 md:flex">
-          <PageHeader
-            title={t('Unincentivized Pools')}
-            subtitle={t('Pools without contributor rewards')}
-          />
-        </div>
-        <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
-          <PoolCards address={address} pools={unIncentivizedPools} />
-        </Grid>
-        <div className="flex-wrap justify-between mt-8 mb-4 md:flex">
-          <PageHeader
-            title={t('Migrated Pools')}
-            subtitle={t('Pools migrated to new reward contracts')}
-          />
-        </div>
-        <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
-          <PoolCards address={address} pools={migratedPools} />
-        </Grid>
-      </StandardPageContainer>
-    </LandingPageWrapper>
+    <div>
+      <div className="flex-wrap justify-between mb-4 md:flex">
+        <PageHeader
+          title={t('Incentivized Pools')}
+          subtitle={t('Contributors are rewarded')}
+        />
+      </div>
+      <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
+        <PoolCards address={address} pools={blastPools} />
+        <PoolCards address={address} pools={incentivizedPools} />
+      </Grid>
+      <div className="flex-wrap justify-between mt-8 mb-4 md:flex">
+        <PageHeader
+          title={t('Unincentivized Pools')}
+          subtitle={t('Pools without contributor rewards')}
+        />
+      </div>
+      <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
+        <PoolCards address={address} pools={unIncentivizedPools} />
+      </Grid>
+      <div className="flex-wrap justify-between mt-8 mb-4 md:flex">
+        <PageHeader
+          title={t('Migrated Pools')}
+          subtitle={t('Pools migrated to new reward contracts')}
+        />
+      </div>
+      <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
+        <PoolCards address={address} pools={migratedPools} />
+      </Grid>
+    </div>
   )
 }
 

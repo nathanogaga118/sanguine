@@ -393,51 +393,49 @@ const StateManagedSwap = () => {
   }
 
   return (
-    <LandingPageWrapper>
-      <div className="flex justify-center px-4 py-16 mx-auto lg:mx-0">
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between">
-            <PageHeader
-              title={t('Swap')}
-              subtitle={t('Exchange assets on chain')}
-            />
-          </div>
-          <BridgeCard bridgeRef={swapDisplayRef}>
-            <SwapMaintenanceProgressBar />
-            <SwapInputContainer setIsTyping={setIsTyping} />
-            <SwitchButton
-              onClick={() => {
-                dispatch(setSwapFromToken(swapToToken))
-                dispatch(setSwapToToken(swapFromToken))
-              }}
-              disabled={isWalletPending}
-            />
-            <SwapOutputContainer />
-            <SwapMaintenanceWarningMessage />
-            <SwapExchangeRateInfo
-              fromAmount={
-                swapFromToken
-                  ? stringToBigInt(
-                      swapFromValue,
-                      swapFromToken.decimals[swapChainId]
-                    )
-                  : 0n
-              }
-              toToken={swapToToken}
-              exchangeRate={swapQuote.exchangeRate}
-              toChainId={swapChainId}
-            />
-            <SwapTransactionButton
-              isTyping={isTyping}
-              isApproved={isApproved}
-              approveTxn={approveTxn}
-              executeSwap={executeSwap}
-              isSwapPaused={isSwapPaused}
-            />
-          </BridgeCard>
+    <div className="flex flex-col w-full max-w-lg mx-auto lg:mx-0">
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between">
+          <PageHeader
+            title={t('Swap')}
+            subtitle={t('Exchange assets on chain')}
+          />
         </div>
+        <BridgeCard bridgeRef={swapDisplayRef}>
+          <SwapMaintenanceProgressBar />
+          <SwapInputContainer setIsTyping={setIsTyping} />
+          <SwitchButton
+            onClick={() => {
+              dispatch(setSwapFromToken(swapToToken))
+              dispatch(setSwapToToken(swapFromToken))
+            }}
+            disabled={isWalletPending}
+          />
+          <SwapOutputContainer />
+          <SwapMaintenanceWarningMessage />
+          <SwapExchangeRateInfo
+            fromAmount={
+              swapFromToken
+                ? stringToBigInt(
+                    swapFromValue,
+                    swapFromToken.decimals[swapChainId]
+                  )
+                : 0n
+            }
+            toToken={swapToToken}
+            exchangeRate={swapQuote.exchangeRate}
+            toChainId={swapChainId}
+          />
+          <SwapTransactionButton
+            isTyping={isTyping}
+            isApproved={isApproved}
+            approveTxn={approveTxn}
+            executeSwap={executeSwap}
+            isSwapPaused={isSwapPaused}
+          />
+        </BridgeCard>
       </div>
-    </LandingPageWrapper>
+    </div>
   )
 }
 
