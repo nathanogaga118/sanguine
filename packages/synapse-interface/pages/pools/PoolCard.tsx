@@ -91,12 +91,7 @@ const PoolCard = memo(({ pool, address }: { pool: Token; address: string }) => {
   return (
     <div
       className={`
-          border
-          ${
-            pool && pool.incentivized
-              ? 'bg-bgBase border-transparent'
-              : 'bg-bgDark border-gray-700'
-          }
+          border border-gray-700
           rounded-md items-center
           space-y-2
           whitespace-wrap

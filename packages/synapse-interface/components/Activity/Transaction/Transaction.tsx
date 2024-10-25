@@ -85,7 +85,6 @@ export const Transaction = React.memo(
         data-test-id="transaction"
         className={`
           flex my-2 rounded-md text-secondary border border-surface
-          ${transactionType === TransactionType.HISTORICAL && 'bg-background'}
         `}
       >
         <TransactionPayloadDetail

@@ -85,7 +85,7 @@ const PoolsPage = () => {
           subtitle={t('Contributors are rewarded')}
         />
       </div>
-      <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
+      <Grid cols={{ xs: 1, sm: 1, md: 1 }} gap={4} className="mb-5">
         <PoolCards address={address} pools={blastPools} />
         <PoolCards address={address} pools={incentivizedPools} />
       </Grid>
@@ -95,7 +95,7 @@ const PoolsPage = () => {
           subtitle={t('Pools without contributor rewards')}
         />
       </div>
-      <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
+      <Grid cols={{ xs: 1, sm: 1, md: 1 }} gap={4} className="mb-5">
         <PoolCards address={address} pools={unIncentivizedPools} />
       </Grid>
       <div className="flex-wrap justify-between mt-8 mb-4 md:flex">
@@ -104,7 +104,7 @@ const PoolsPage = () => {
           subtitle={t('Pools migrated to new reward contracts')}
         />
       </div>
-      <Grid cols={{ xs: 1, sm: 1, md: 2 }} gap={4} className="mb-5">
+      <Grid cols={{ xs: 1, sm: 1, md: 1 }} gap={4} className="mb-5">
         <PoolCards address={address} pools={migratedPools} />
       </Grid>
     </div>
