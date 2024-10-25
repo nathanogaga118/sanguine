@@ -3,11 +3,12 @@ package signoz
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/dubonzi/otelresty"
 	"github.com/go-resty/resty/v2"
 	v3 "github.com/synapsecns/sanguine/contrib/opbot/signoz/generated/v3"
 	"github.com/synapsecns/sanguine/core/metrics"
-	"time"
 )
 
 // Client is a signoz client.
@@ -174,6 +175,9 @@ func (c *Client) SearchTraces(ctx context.Context, timePeriod TimePreferenceType
 
 	filterItems := make([]v3.FilterItem, 0, len(searchTerms))
 	for key, value := range searchTerms {
+		if key == "order" {
+			continue
+		}
 		filterItems = append(filterItems, v3.FilterItem{
 			Key: v3.AttributeKey{
 				Key:      key,

@@ -52,79 +52,61 @@ func (b *Bot) requiresSignoz(definition *slacker.CommandDefinition) *slacker.Com
 // TODO: add trace middleware.
 func (b *Bot) traceCommand() *slacker.CommandDefinition {
 	return b.requiresSignoz(&slacker.CommandDefinition{
-		Command:     "trace {tags} {service} {order}",
-		Description: "TESTING TESTING in signoz",
+		Command:     "trace <tags>",
+		Description: "retrieve traces for an rfq transaction from signoz",
 		Examples: []string{
-			"trace transaction_id:0x1234 serviceName:rfq",
-			"trace transaction_id:0x1234 serviceName:rfq a",
-			"trace transaction_id:0x1234 serviceName:rfq asc",
+			"trace transaction_id:0x1234 serviceName:rfq [order:a|order:asc]",
 		},
 		Handler: func(ctx *slacker.CommandContext) {
-			tags := stripLinks(ctx.Request().Param("tags"))
-			_, _ = ctx.Response().Reply("these are the tags: " + tags)
-			service := strings.ToLower(ctx.Request().Param("service"))
-			_, _ = ctx.Response().Reply("this is the service: " + service)
-			order := strings.ToLower(ctx.Request().Param("order"))
-			_, _ = ctx.Response().Reply("this is the order: " + order)
-
-			searchMap := make(map[string]string)
-			tagsSplit := strings.Split(tags, ":")
-			serviceSplit := strings.Split(service, ":")
-			searchMap[tagsSplit[0]] = tagsSplit[1]
-			searchMap[serviceSplit[0]] = serviceSplit[1]
-			// _, _ = ctx.Response().Reply("this is the search map: " + fmt.Sprintf("%v", searchMap))
-			// _, _ = ctx.Response().Reply("these are the split tags: " + strings.Join(splitTags, ", "))
-			// for _, combinedTag := range splitTags {
-			// 	tag := strings.Split(combinedTag, ":")
-			// 	if len(tag) != 2 {
-			// 		_, err := ctx.Response().Reply("please provide tags in a key:value format")
-			// 		if err != nil {
-			// 			log.Println(err)
-			// 		}
-			// 		return
-			// 	}
-			// 	searchMap[tag[0]] = tag[1]
-			// }
-
-			_, _ = ctx.Response().Reply("this is the search map: " + fmt.Sprintf("%v", searchMap))
-
-			// search for the transaction
-			res, err := b.signozClient.SearchTraces(ctx.Context(), signoz.Last3Hr, searchMap)
-			if err != nil {
-				b.logger.Errorf(ctx.Context(), "error searching for the transaction: %v", err)
-				_, err := ctx.Response().Reply("error searching for the transaction")
+			tags := ctx.Request().Param("tags")
+			splitTags := strings.Split(tags, " ")
+			if len(splitTags) == 0 {
+				_, err := ctx.Response().Reply("please provide tags in a key:value format")
 				if err != nil {
 					log.Println(err)
 				}
 				return
 			}
+			searchMap := make(map[string]string)
+			for _, combinedTag := range splitTags {
+				tag := strings.Split(combinedTag, ":")
+				if len(tag) != 2 {
+					_, err := ctx.Response().Reply("please provide tags in a key:value format")
+					if err != nil {
+						log.Println(err)
+					}
+					return
+				}
+				searchMap[tag[0]] = tag[1]
+			}
+
+			// search for the transaction
+			res, err := b.signozClient.SearchTraces(ctx.Context(), signoz.Last3Days, searchMap)
+			if err != nil {
+				b.replyAndLog(ctx, "invalid input format, please follow `transaction_id:<TXID> serviceName:<service> order:<order?>`")
+				return
+			}
 
 			if res.Status != "success" || res.Data.ContextTimeout || len(res.Data.Result) != 1 {
-				_, err := ctx.Response().Reply(fmt.Sprintf("error searching for the transaction %s", res.Data.ContextTimeoutMessage))
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, "no transaction found")
 				return
 			}
 
 			traceList := res.Data.Result[0].List
 			if len(traceList) == 0 {
-				_, err := ctx.Response().Reply("no transaction found")
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, "no traces found")
 				return
 			}
 
-			isAscending := order == "a" || order == "asc"
-			if isAscending {
-				_, _ = ctx.Response().Reply("sorting in ascending order")
+			order := strings.ToLower(searchMap["order"])
+			if order == "a" || order == "asc" {
+				// sort the slice by Timestamp in ascending order
 				sort.Slice(traceList, func(i, j int) bool {
 					return traceList[i].Timestamp.Before(traceList[j].Timestamp)
 				})
 			}
 
-			slackBlocks := []slack.Block{slack.NewHeaderBlock(slack.NewTextBlockObject(slack.PlainTextType, fmt.Sprintf("Traces for %s", tags), false, false))}
+			slackBlocks := []slack.Block{slack.NewHeaderBlock(slack.NewTextBlockObject(slack.PlainTextType, fmt.Sprintf("Traces for %s", searchMap["transaction_id"]), false, false))}
 
 			for _, results := range traceList {
 				trace := results.Data["traceID"].(string)
@@ -178,10 +160,7 @@ func (b *Bot) rfqLookupCommand() *slacker.CommandDefinition {
 			var sliceMux sync.Mutex
 
 			if len(b.cfg.RelayerURLS) == 0 {
-				_, err := ctx.Response().Reply("no relayer urls configured")
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, "no relayers configured")
 				return
 			}
 
@@ -219,10 +198,7 @@ func (b *Bot) rfqLookupCommand() *slacker.CommandDefinition {
 			wg.Wait()
 
 			if len(statuses) == 0 {
-				_, err := ctx.Response().Reply("no quote request found")
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, "no quote request found")
 				return
 			}
 
@@ -290,10 +266,7 @@ func (b *Bot) rfqRefund() *slacker.CommandDefinition {
 			tx := stripLinks(ctx.Request().Param("tx"))
 
 			if len(tx) == 0 {
-				_, err := ctx.Response().Reply("please provide a tx hash")
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, "please provide a tx hash or tx id")
 				return
 			}
 
@@ -308,33 +281,23 @@ func (b *Bot) rfqRefund() *slacker.CommandDefinition {
 				}
 			}
 			if err != nil {
-				b.logger.Errorf(ctx.Context(), "error fetching quote request: %v", err)
-				_, err := ctx.Response().Reply("error fetching quote request")
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, "error fetching quote request")
 				return
 			}
 
 			fastBridgeContract, err := b.makeFastBridge(ctx.Context(), rawRequest)
 			if err != nil {
-				_, err := ctx.Response().Reply(err.Error())
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, fmt.Sprintf("could not make fastbridge %v", err.Error()))
 				return
 			}
 
 			isScreened, err := b.screener.ScreenAddress(ctx.Context(), rawRequest.Sender)
 			if err != nil {
-				_, err := ctx.Response().Reply("error screening address")
-				if err != nil {
-					log.Println(err)
-				}
+				b.replyAndLog(ctx, fmt.Sprintf("error screening address %v", err))
 				return
 			}
 			if isScreened {
-				_, err := ctx.Response().Reply("address cannot be refunded")
+				_, err := ctx.Response().Reply("address cannot be refunded due to being screened")
 				if err != nil {
 					log.Println(err)
 				}
@@ -461,4 +424,10 @@ func getQuoteRequest(ctx context.Context, client relapi.RelayerClient, tx string
 	}
 
 	return nil, fmt.Errorf("error fetching quote request: %w", err)
+}
+
+func (b *Bot) replyAndLog(ctx *slacker.CommandContext, message string) {
+	if _, err := ctx.Response().Reply(message); err != nil {
+		b.logger.Errorf(ctx.Context(), "failed to send reply: %v", err)
+	}
 }
