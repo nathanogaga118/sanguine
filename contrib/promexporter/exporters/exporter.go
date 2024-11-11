@@ -18,7 +18,6 @@ import (
 	"github.com/synapsecns/sanguine/core/ginhelper"
 	"github.com/synapsecns/sanguine/core/metrics"
 	"github.com/synapsecns/sanguine/core/metrics/instrumentation/httpcapture"
-	"github.com/synapsecns/sanguine/core/retry"
 	omnirpcClient "github.com/synapsecns/sanguine/services/omnirpc/client"
 	"golang.org/x/sync/errgroup"
 )
@@ -106,11 +105,14 @@ func StartExporterServer(ctx context.Context, handler metrics.Handler, cfg confi
 const defaultMetricsInterval = 10
 
 func (e *exporter) recordMetrics(ctx context.Context) (err error) {
+	ticker := time.NewTicker(defaultMetricsInterval * time.Second)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return fmt.Errorf("could not record metrics: %w", ctx.Err())
-		case <-time.After(defaultMetricsInterval * time.Second):
+		case <-ticker.C:
 			err = e.collectMetrics(ctx)
 			if err != nil {
 				logger.Errorf("could not collect metrics: %v", err)
@@ -128,47 +130,52 @@ func (e *exporter) collectMetrics(parentCtx context.Context) (err error) {
 		metrics.EndSpanWithErr(span, combineErrors(errs))
 	}()
 
-	if err := e.fetchRelayerBalances(ctx, e.cfg.RFQAPIUrl); err != nil {
-		errs = append(errs, fmt.Errorf("could not fetch relayer balances: %w", err))
-		span.AddEvent("could not fetch relayer balances")
-	}
-
-	if err := e.getTokenBalancesStats(ctx); err != nil {
-		errs = append(errs, fmt.Errorf("could not get token balances: %w", err))
-		span.AddEvent("could not get token balances")
-	}
-
-	// TODO: parallelize
+	g, ctx := errgroup.WithContext(parentCtx)
+	g.Go(func() error {
+		return e.fetchRelayerBalances(ctx, e.cfg.RFQAPIUrl)
+	})
+	g.Go(func() error {
+		return e.getTokenBalancesStats(ctx)
+	})
 	for _, pending := range e.cfg.DFKPending {
-		if err := e.stuckHeroCountStats(ctx, common.HexToAddress(pending.Owner), pending.ChainName); err != nil {
-			errs = append(errs, fmt.Errorf("could not get stuck hero count: %w", err))
-			span.AddEvent("could not get stuck hero count")
-		}
+		pending := pending
+		g.Go(func() error {
+			return e.stuckHeroCountStats(ctx, common.HexToAddress(pending.Owner), pending.ChainName)
+		})
 	}
-
 	for _, gasCheck := range e.cfg.SubmitterChecks {
+		gasCheck := gasCheck
 		for _, chainID := range gasCheck.ChainIDs {
-			if err := e.submitterStats(common.HexToAddress(gasCheck.Address), chainID, gasCheck.Name); err != nil {
-				errs = append(errs, fmt.Errorf("could not get submitter stats: %w", err))
-				span.AddEvent("could not get submitter stats")
-			}
+			chainID := chainID
+			g.Go(func() error {
+				if err := e.submitterStats(common.HexToAddress(gasCheck.Address), chainID, gasCheck.Name); err != nil {
+					span.AddEvent("could not get submitter stats")
+					return fmt.Errorf("could not get submitter stats: %w", err)
+				}
+				return nil
+			})
 		}
 	}
 
 	for chainID := range e.cfg.BridgeChecks {
+		chainID := chainID
 		for _, token := range e.cfg.VpriceCheckTokens {
-			//nolint: wrapcheck
-			return retry.WithBackoff(ctx, func(ctx context.Context) error {
-				err := e.vpriceStats(ctx, chainID, token)
-				if err != nil && !errors.Is(err, errPoolNotExist) {
-					errs = append(errs, fmt.Errorf("could not get vprice %w", err))
-					span.AddEvent("could not get vprice stats")
-				}
-
-				return nil
-			}, retry.WithMaxAttempts(-1), retry.WithMaxAttemptTime(time.Second*10), retry.WithMaxTotalTime(-1))
+			token := token
+			g.Go(
+				func() error {
+					if err := e.vpriceStats(ctx, chainID, token); err != nil && !errors.Is(err, errPoolNotExist) {
+						span.AddEvent("could not get vprice stats")
+						return fmt.Errorf("could not get vprice stats: %w", err)
+					}
+					return nil
+				},
+			)
 		}
-		span.AddEvent("could not get vprice stats")
+	}
+
+	if err := g.Wait(); err != nil {
+		span.AddEvent("could not collect metrics")
+		errs = append(errs, err)
 	}
 
 	if len(errs) > 0 {
