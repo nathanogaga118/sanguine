@@ -1,0 +1,12 @@
+{
+  "accounts": {
+    "admin": "",
+    "guards": [],
+    "provers": [],
+    "quoters": [],
+    "cancelers": [],
+    "governors": []
+  },
+  "cancelDelay": 0,
+  "protocolFeeRate": 0
+}
