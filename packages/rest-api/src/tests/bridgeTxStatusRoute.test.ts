@@ -25,7 +25,7 @@ describe('Get Bridge TX Status Route', () => {
       expect(response.body.toInfo).toHaveProperty('txnHash')
       expect(response.body.toInfo).toHaveProperty('formattedValue')
     }
-  }, 10000)
+  })
 
   it('should return 400 for unsupported destChainId', async () => {
     const response = await request(app).get('/bridgeTxStatus').query({
@@ -39,7 +39,7 @@ describe('Get Bridge TX Status Route', () => {
       'message',
       'Unsupported destChainId'
     )
-  }, 10000)
+  })
 
   it('should return 400 for invalid bridgeModule', async () => {
     const response = await request(app).get('/bridgeTxStatus').query({
@@ -53,7 +53,7 @@ describe('Get Bridge TX Status Route', () => {
       'message',
       'Invalid bridge module. Must be one of: SynapseBridge, SynapseCCTP, SynapseRFQ'
     )
-  }, 10000)
+  })
 
   it('should return 400 for missing synapseTxId', async () => {
     const response = await request(app).get('/bridgeTxStatus').query({
@@ -62,7 +62,7 @@ describe('Get Bridge TX Status Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'synapseTxId')
-  }, 10000)
+  })
 
   it('should return 400 for invalid synapseTxId', async () => {
     const response = await request(app).get('/bridgeTxStatus').query({
@@ -76,7 +76,7 @@ describe('Get Bridge TX Status Route', () => {
       'message',
       'synapseTxId must be valid hex string'
     )
-  }, 10000)
+  })
 
   it('should return 400 for missing destChainId', async () => {
     const response = await request(app).get('/bridgeTxStatus').query({
@@ -86,7 +86,7 @@ describe('Get Bridge TX Status Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'destChainId')
-  }, 10000)
+  })
 
   it('should return 400 for missing bridgeModule', async () => {
     const response = await request(app).get('/bridgeTxStatus').query({
@@ -96,5 +96,5 @@ describe('Get Bridge TX Status Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'bridgeModule')
-  }, 10000)
+  })
 })

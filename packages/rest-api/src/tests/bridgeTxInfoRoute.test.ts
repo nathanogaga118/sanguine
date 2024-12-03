@@ -27,7 +27,7 @@ describe('Bridge TX Info Route', () => {
       'to',
       '0xd5a597d6e7ddf373a92C8f477DAAA673b0902F48'
     )
-  }, 10_000)
+  })
 
   it('should return bridge transaction info for valid input with valid originUserAddress', async () => {
     const response = await request(app).get('/bridgeTxInfo').query({
@@ -48,7 +48,7 @@ describe('Bridge TX Info Route', () => {
       'to',
       '0xd5a597d6e7ddf373a92C8f477DAAA673b0902F48'
     )
-  }, 10_000)
+  })
 
   it('should return 400 for invalid originUserAddress', async () => {
     const response = await request(app).get('/bridgeTxInfo').query({
@@ -66,7 +66,7 @@ describe('Bridge TX Info Route', () => {
       'message',
       'Invalid originUserAddress address'
     )
-  }, 10_000)
+  })
 
   it('should return 400 for unsupported route', async () => {
     const response = await request(app).get('/bridgeTxInfo').query({
@@ -175,5 +175,5 @@ describe('Bridge TX Info Route', () => {
       'message',
       expect.stringContaining('Amount has too many decimals')
     )
-  }, 10000)
+  })
 })

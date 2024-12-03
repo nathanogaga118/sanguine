@@ -22,7 +22,7 @@ describe('Get Destination TX Route', () => {
       expect(response.body.toInfo).toHaveProperty('chainID')
       expect(response.body.toInfo).toHaveProperty('address')
     }
-  }, 10000)
+  })
 
   it('should return a refunded response for refunded transaction', async () => {
     const response = await request(app).get('/destinationTx').query({
@@ -41,7 +41,7 @@ describe('Get Destination TX Route', () => {
     }
     expect(response.body).toHaveProperty('toInfo')
     expect(response.body.toInfo).toBeNull()
-  }, 10000)
+  })
 
   it('should return 404 for non-existent txHash', async () => {
     const response = await request(app).get('/destinationTx').query({
@@ -52,7 +52,7 @@ describe('Get Destination TX Route', () => {
 
     expect(response.status).toBe(404)
     expect(response.body.status).toBe('not found')
-  }, 10000)
+  })
 
   it('should return 400 for missing originChainId', async () => {
     const response = await request(app).get('/destinationTx').query({
@@ -61,7 +61,7 @@ describe('Get Destination TX Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'originChainId')
-  }, 10000)
+  })
 
   it('should return 400 for missing txHash', async () => {
     const response = await request(app).get('/destinationTx').query({
@@ -69,7 +69,7 @@ describe('Get Destination TX Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'txHash')
-  }, 10000)
+  })
 
   it('should return 400 for non-numeric originChainId', async () => {
     const response = await request(app).get('/destinationTx').query({
@@ -79,5 +79,5 @@ describe('Get Destination TX Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'originChainId')
-  }, 10000)
+  })
 })

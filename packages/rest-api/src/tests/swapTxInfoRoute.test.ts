@@ -20,7 +20,7 @@ describe('Swap TX Info Route with Real Synapse Service', () => {
     expect(response.body).toHaveProperty('data')
     expect(response.body).toHaveProperty('to')
     expect(response.body).toHaveProperty('value')
-  }, 10_000)
+  })
 
   it('should return 400 for invalid address, with error message', async () => {
     const response = await request(app).get('/swapTxInfo').query({
@@ -35,7 +35,7 @@ describe('Swap TX Info Route with Real Synapse Service', () => {
       'message',
       'Invalid Ethereum address'
     )
-  }, 10_000)
+  })
 
   it('should return 400 for unsupported chain, with error message', async () => {
     const response = await request(app).get('/swapTxInfo').query({
@@ -47,7 +47,7 @@ describe('Swap TX Info Route with Real Synapse Service', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('message', 'Unsupported chain')
-  }, 10_000)
+  })
 
   it('should return 400 for invalid toToken address, with error message', async () => {
     const response = await request(app).get('/swapTxInfo').query({
@@ -62,7 +62,7 @@ describe('Swap TX Info Route with Real Synapse Service', () => {
       'message',
       'Invalid toToken address'
     )
-  }, 10_000)
+  })
 
   it('should return 400 for token not supported on specified chain', async () => {
     const response = await request(app).get('/swapTxInfo').query({
@@ -77,7 +77,7 @@ describe('Swap TX Info Route with Real Synapse Service', () => {
       'message',
       'Invalid toToken address'
     )
-  }, 10_000)
+  })
 
   it('should return 400 for missing amount, with error message', async () => {
     const response = await request(app).get('/swapTxInfo').query({
@@ -88,7 +88,7 @@ describe('Swap TX Info Route with Real Synapse Service', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'amount')
-  }, 10_000)
+  })
 
   it('should return 400 for amount with too many decimals', async () => {
     const response = await request(app).get('/swapTxInfo').query({
@@ -104,5 +104,5 @@ describe('Swap TX Info Route with Real Synapse Service', () => {
       'message',
       expect.stringContaining('Amount has too many decimals')
     )
-  }, 10000)
+  })
 })

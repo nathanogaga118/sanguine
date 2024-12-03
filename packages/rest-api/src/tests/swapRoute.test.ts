@@ -21,7 +21,7 @@ describe('Swap Route with Real Synapse Service', () => {
     expect(response.body).toHaveProperty('maxAmountOut')
     expect(response.body).toHaveProperty('routerAddress')
     expect(response.body).toHaveProperty('query')
-  }, 10_000)
+  })
 
   it('should return a real swap quote for valid input, Eth ZeroAddress', async () => {
     const response = await request(app).get('/swap').query({
@@ -35,7 +35,7 @@ describe('Swap Route with Real Synapse Service', () => {
     expect(response.body).toHaveProperty('maxAmountOut')
     expect(response.body).toHaveProperty('routerAddress')
     expect(response.body).toHaveProperty('query')
-  }, 10_000)
+  })
 
   it('should return a real swap quote for valid input, Eth NativeGasAddress', async () => {
     const response = await request(app).get('/swap').query({
@@ -49,7 +49,7 @@ describe('Swap Route with Real Synapse Service', () => {
     expect(response.body).toHaveProperty('maxAmountOut')
     expect(response.body).toHaveProperty('routerAddress')
     expect(response.body).toHaveProperty('query')
-  }, 10_000)
+  })
 
   it('should return 400 for unsupported chain, with error message', async () => {
     const response = await request(app).get('/swap').query({
@@ -61,7 +61,7 @@ describe('Swap Route with Real Synapse Service', () => {
 
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('message', 'Unsupported chain')
-  }, 10_000)
+  })
 
   it('should return 400 for invalid toToken address, with error message', async () => {
     const response = await request(app).get('/swap').query({
@@ -76,7 +76,7 @@ describe('Swap Route with Real Synapse Service', () => {
       'message',
       'Invalid toToken address'
     )
-  }, 10_000)
+  })
 
   it('should return 400 for swap on unsupported chain', async () => {
     const response = await request(app).get('/swap').query({
@@ -121,7 +121,7 @@ describe('Swap Route with Real Synapse Service', () => {
       'message',
       'Invalid toToken address'
     )
-  }, 10_000)
+  })
 
   it('should return 400 for missing amount, with error message', async () => {
     const response = await request(app).get('/swap').query({
@@ -132,7 +132,7 @@ describe('Swap Route with Real Synapse Service', () => {
 
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'amount')
-  }, 10_000)
+  })
 
   it('should return swap quote with callData when address is provided', async () => {
     const response = await request(app).get('/swap').query({
@@ -151,7 +151,7 @@ describe('Swap Route with Real Synapse Service', () => {
     expect(response.body.callData).toHaveProperty('to')
     expect(response.body.callData).toHaveProperty('data')
     expect(response.body.callData).toHaveProperty('value')
-  }, 10_000)
+  })
 
   it('should return swap quote without callData when address is not provided', async () => {
     const response = await request(app).get('/swap').query({
@@ -166,7 +166,7 @@ describe('Swap Route with Real Synapse Service', () => {
     expect(response.body).toHaveProperty('routerAddress')
     expect(response.body).toHaveProperty('query')
     expect(response.body.callData).toBeNull()
-  }, 10_000)
+  })
 
   it('should return 400 for invalid address', async () => {
     const response = await request(app).get('/swap').query({
@@ -179,5 +179,5 @@ describe('Swap Route with Real Synapse Service', () => {
 
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('message', 'Invalid address')
-  }, 10_000)
+  })
 })

@@ -16,7 +16,7 @@ describe('Get Synapse TX ID Route', () => {
     })
     expect(response.status).toBe(200)
     expect(response.body).toHaveProperty('synapseTxId')
-  }, 10000)
+  })
 
   it('should return 400 for missing originChainId', async () => {
     const response = await request(app).get('/synapseTxId').query({
@@ -26,7 +26,7 @@ describe('Get Synapse TX ID Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'originChainId')
-  }, 10000)
+  })
 
   it('should return 400 for missing bridgeModule', async () => {
     const response = await request(app).get('/synapseTxId').query({
@@ -36,7 +36,7 @@ describe('Get Synapse TX ID Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'bridgeModule')
-  }, 10000)
+  })
 
   it('should return 400 for missing txHash', async () => {
     const response = await request(app).get('/synapseTxId').query({
@@ -45,7 +45,7 @@ describe('Get Synapse TX ID Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'txHash')
-  }, 10000)
+  })
 
   it('should return 400 for non-numeric originChainId', async () => {
     const response = await request(app).get('/synapseTxId').query({
@@ -56,7 +56,7 @@ describe('Get Synapse TX ID Route', () => {
     })
     expect(response.status).toBe(400)
     expect(response.body.error).toHaveProperty('field', 'originChainId')
-  }, 10000)
+  })
 
   it('should return 400 for invalid bridgeModule', async () => {
     const response = await request(app).get('/synapseTxId').query({
@@ -70,5 +70,5 @@ describe('Get Synapse TX ID Route', () => {
       'message',
       'Invalid bridge module. Must be one of: SynapseBridge, SynapseCCTP, SynapseRFQ'
     )
-  }, 10000)
+  })
 })
