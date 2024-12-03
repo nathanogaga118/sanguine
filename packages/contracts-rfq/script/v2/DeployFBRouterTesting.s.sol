@@ -27,6 +27,7 @@ contract DeployFastBridgeRouterTesting is SynapseScript {
             )
         );
         setSwapQuoter();
+        setFastBridge();
     }
 
     function setSwapQuoter() internal {
@@ -36,6 +37,18 @@ contract DeployFastBridgeRouterTesting is SynapseScript {
         if (router.swapQuoter() != quoter) {
             router.setSwapQuoter(quoter);
             printSuccessWithIndent(string.concat("Swap quoter ", action));
+        } else {
+            printSkipWithIndent(string.concat("already ", action));
+        }
+    }
+
+    function setFastBridge() internal {
+        printLog("Setting fast bridge");
+        address fastBridge = getDeploymentAddress({contractName: "FastBridgeV2", revertIfNotFound: true});
+        string memory action = string.concat("set to ", vm.toString(fastBridge));
+        if (router.fastBridge() != fastBridge) {
+            router.setFastBridge(fastBridge);
+            printSuccessWithIndent(string.concat("Fast bridge ", action));
         } else {
             printSkipWithIndent(string.concat("already ", action));
         }
