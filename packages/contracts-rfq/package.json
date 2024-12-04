@@ -13,7 +13,6 @@
   },
   "devDependencies": {
     "@synapsecns/solidity-devops": "^0.4.8",
-    "jest-retries": "^1.0.1",
     "solhint": "5.0.3"
   },
   "scripts": {
