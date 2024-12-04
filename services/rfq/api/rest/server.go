@@ -330,6 +330,7 @@ func (r *QuoterAPIServer) AuthMiddleware() gin.HandlerFunc {
 		for _, destChainID := range destChainIDs {
 			addr, err := r.checkRoleParallel(c, destChainID)
 			if err != nil {
+				fmt.Printf("err checking role parallel: %s\n", err)
 				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 				c.Abort()
 				return
@@ -356,6 +357,7 @@ type roleContract interface {
 }
 
 func (r *QuoterAPIServer) checkRoleParallel(c *gin.Context, destChainID uint32) (addressRecovered common.Address, err error) {
+	fmt.Printf("checkRoleParallel: destChainID: %d\n", destChainID)
 	g := new(errgroup.Group)
 	var v1Addr, v2Addr common.Address
 	var v1Ok, v2Ok bool
@@ -365,30 +367,37 @@ func (r *QuoterAPIServer) checkRoleParallel(c *gin.Context, destChainID uint32) 
 	relayerRole := crypto.Keccak256Hash([]byte("RELAYER_ROLE"))
 	g.Go(func() error {
 		v1Addr, v1Err = r.checkRole(c, destChainID, true, relayerRole)
+		fmt.Printf("checkRole: v1Addr: %s, v1Err: %s [relayer] \n", v1Addr, v1Err)
 		v1Ok = v1Err == nil
 		return v1Err
 	})
 	g.Go(func() error {
 		v2Addr, v2Err = r.checkRole(c, destChainID, false, quoterRole)
+		fmt.Printf("checkRole: v2Addr: %s, v2Err: %s [quoter] \n", v2Addr, v2Err)
 		v2Ok = v2Err == nil
 		return v2Err
 	})
 
 	err = g.Wait()
 	if v1Ok {
+		fmt.Println("v1OK")
 		return v1Addr, nil
 	}
 	if v2Ok {
+		fmt.Printf("v2OK")
 		return v2Addr, nil
 	}
 	if err != nil {
+		fmt.Printf("role check failed: %s\n", err)
 		return common.Address{}, fmt.Errorf("role check failed: %w", err)
 	}
 
+	fmt.Printf("role check failed for both v1 and v2\n")
 	return common.Address{}, fmt.Errorf("role check failed for both v1 and v2")
 }
 
 func (r *QuoterAPIServer) checkRole(c *gin.Context, destChainID uint32, useV1 bool, role [32]byte) (addressRecovered common.Address, err error) {
+	fmt.Printf("checkRole: destChainID: %d, useV1: %t, role: %s\n", destChainID, useV1, string(role[:]))
 	var bridge roleContract
 	var roleCache *ttlcache.Cache[string, bool]
 	var ok bool
