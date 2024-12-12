@@ -58,6 +58,27 @@ func (a *AbiSuite) TestCompileSolidityExplicitEVM() {
 	}
 }
 
+func (a *AbiSuite) TestCompileSolidityNativeBinary(t *testing.T) {
+	if !internal.IsAppleSilicon() {
+		t.Skip("Skipping native binary test on non-Apple Silicon")
+	}
+
+	vals, err := internal.CompileSolidity("0.8.4", a.exampleFilePath, 1, nil)
+	Nil(t, err)
+
+	Len(t, vals, 1)
+	for _, value := range vals {
+		Equal(t, value.Info.CompilerVersion, "0.8.4")
+		Equal(t, value.Info.LanguageVersion, "0.8.4")
+
+		var metadata ContractMetadata
+		err = json.Unmarshal([]byte(value.Info.Metadata), &metadata)
+		a.Require().NoError(err)
+
+		NotContains(t, metadata.Settings.CompilationTarget, "/solidity/")
+	}
+}
+
 func TestFilePathsAreEqual(t *testing.T) {
 	tests := []struct {
 		file1 string

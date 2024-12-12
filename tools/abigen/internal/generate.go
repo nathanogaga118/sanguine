@@ -124,6 +124,16 @@ func BuildTemplates(version, file, pkg, filename string, optimizerRuns int, evmV
 // compileSolidity uses docker to compile solidity.
 // nolint: cyclop
 func compileSolidity(version string, filePath string, optimizeRuns int, evmVersion *string) (map[string]*compiler.Contract, error) {
+	// Try native binary first on Apple Silicon
+	if IsAppleSilicon() {
+		binaryPath, err := GetSolcBinary(version)
+		if err == nil {
+			return compileWithNativeBinary(binaryPath, filePath, version, optimizeRuns, evmVersion)
+		}
+		// Log error but continue to Docker fallback
+		fmt.Printf("Warning: Native binary fallback failed: %v\n", err)
+	}
+
 	runFile, err := createRunFile(version)
 	if err != nil {
 		return nil, err
@@ -201,6 +211,34 @@ func compileSolidity(version string, filePath string, optimizeRuns int, evmVersi
 		return nil, fmt.Errorf("could not parse json: %w", err)
 	}
 	return contract, nil
+}
+
+// compileWithNativeBinary compiles solidity using a native solc binary.
+func compileWithNativeBinary(binaryPath, filePath, version string, optimizeRuns int, evmVersion *string) (map[string]*compiler.Contract, error) {
+	// Read source file
+	solContents, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("could not read sol file %s: %w", filePath, err)
+	}
+
+	args := []string{"--combined-json", "bin,bin-runtime,srcmap,srcmap-runtime,abi,userdoc,devdoc,metadata,hashes", "--optimize", "--optimize-runs", strconv.Itoa(optimizeRuns), "--allow-paths", "., ./, ../"}
+
+	if evmVersion != nil {
+		args = append(args, fmt.Sprintf("--evm-version=%s", *evmVersion))
+	}
+
+	args = append(args, filePath)
+
+	var stderr, stdout bytes.Buffer
+	cmd := exec.Command(binaryPath, args...)
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("solc: %w\n%s", err, stderr.Bytes())
+	}
+
+	return compiler.ParseCombinedJSON(stdout.Bytes(), string(solContents), version, version, strings.Join(args, " "))
 }
 
 // createRunFile creates a bash file to run a command in the specified version of solidity.
