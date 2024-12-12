@@ -215,7 +215,10 @@ func compileSolidity(version string, filePath string, optimizeRuns int, evmVersi
 
 // compileWithNativeBinary compiles solidity using a native solc binary.
 func compileWithNativeBinary(binaryPath, filePath, version string, optimizeRuns int, evmVersion *string) (map[string]*compiler.Contract, error) {
-	// Read source file
+	if !filepath.IsAbs(filePath) {
+		return nil, fmt.Errorf("file path must be absolute: %s", filePath)
+	}
+
 	solContents, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("could not read sol file %s: %w", filePath, err)
@@ -228,6 +231,10 @@ func compileWithNativeBinary(binaryPath, filePath, version string, optimizeRuns 
 	}
 
 	args = append(args, filePath)
+
+	if !filepath.IsAbs(binaryPath) {
+		return nil, fmt.Errorf("solc binary path must be absolute: %s", binaryPath)
+	}
 
 	var stderr, stdout bytes.Buffer
 	cmd := exec.Command(binaryPath, args...)

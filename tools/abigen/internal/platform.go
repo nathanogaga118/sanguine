@@ -6,7 +6,7 @@ import (
     "os/exec"
 )
 
-// IsAppleSilicon returns true if running on Apple Silicon (ARM64) architecture
+// IsAppleSilicon returns true if running on Apple Silicon (ARM64) architecture.
 func IsAppleSilicon() bool {
     if runtime.GOOS != "darwin" {
         return false
